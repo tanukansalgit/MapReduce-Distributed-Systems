@@ -1,6 +1,9 @@
 from multiprocessing import Process
 import os
 
+from mapper import Mapper
+
+
 class Master(Process):
     def __init__(self, nMappers, nReducers, filePaths, fileMaxSize):
         self.nMappers = nMappers
@@ -16,6 +19,7 @@ class Master(Process):
     #preprocessing
     def preprocessing(self):
         self.splitFiles()
+        self.initializeMasters()
         pass
 
     '''
@@ -72,7 +76,10 @@ class Master(Process):
 
             self.filePaths = filePaths
 
-    def initializeMasters():
+    def initializeMasters(self):
+        mappers = []
+        for i in range(self.nMappers):
+            mappers.append(Mapper(i))
         pass
 
     def initializeReducers():
