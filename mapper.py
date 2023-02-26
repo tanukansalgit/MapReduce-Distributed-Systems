@@ -13,18 +13,18 @@ class Mapper(Process):
         self.mapperKey = getMapperStatusKey(id)
 
     def processFile(self):
-        print("in process fil fucntion")
         try:
             fileName = self.file.split("/")[-1]
             content = ""
+
             countKey = getMapperCountOutputKey(self.id)
-            countContent = self.keyValueClient.getKey(countKey).decode() or ""
+            countContent = self.keyValueClient.getKey(countKey)
+            
             fileKey = getMapperFileOutputKey(self.id)
+            fileContent = self.keyValueClient.getKey(fileKey)
 
-            fileContent = self.keyValueClient.getKey(fileKey).decode() or ""
-
-            print('countContent===', countContent)
-            print('fileContent===', fileContent)
+            countContent = countContent.decode() if countContent else ""
+            fileContent = fileContent.decode() if fileContent else ""
 
             with open(self.file, 'r') as f:
                 content = f.read()
@@ -34,26 +34,16 @@ class Mapper(Process):
                 countContent = countContent + f" {word} 1"
                 fileContent = fileContent + f" {word} {fileName}"
 
-            print('countContent===', countContent)
-            print('fileContent===', fileContent)
             self.keyValueClient.setKey(countKey, countContent)
             self.keyValueClient.setKey(fileKey, fileContent)
-            self.keyValueClient.setKey(self.mapperKey, WorkerStatus.COMPLETED.value)
-        except:
+        except Exception as e:
+            print(f"Exception in {self.id} mapper: {e}")
             self.keyValueClient.setKey(self.mapperKey, WorkerStatus.FAILED.value)
 
     def run(self):
-        #state chnge
-        print('Running mapper run function', self.id)
-        print('herer1')
-        result1 = self.keyValueClient.getKey(self.mapperKey)
-        print('get result==', result1)
-        result= self.keyValueClient.setKey(self.mapperKey, WorkerStatus.IN_PROGRESS.value)
-        print('hererer2', result)
-        result1 = self.keyValueClient.getKey(self.mapperKey)
-        print('get result==', result1)
+        self.keyValueClient.setKey(self.mapperKey, WorkerStatus.IN_PROGRESS.value)
         self.processFile()
-        # self.keyValueClient.setKey(self.mapperKey, WorkerStatus.IDLE.value)
+        self.keyValueClient.setKey(self.mapperKey, WorkerStatus.IDLE.value)
 
 
 

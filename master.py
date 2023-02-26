@@ -35,7 +35,6 @@ class Master(Process):
         self.splitFiles()
         self.initializeMappers()
         self.assignFilePartitionsToMapper()
-        print('mapperjobs==', self.mapperJobs)
         pass
 
     '''
@@ -93,7 +92,6 @@ class Master(Process):
             self.filePaths = filePaths
 
     def initializeMappers(self):
-        print('initialise calling')
         for i in range(self.nMappers):
             self.availableMapperQueue.put(i)
             key = getMapperStatusKey(i)
@@ -116,7 +114,7 @@ class Master(Process):
                 mapperId = self.availableMapperQueue.get()
                 mapper = self.createMapper(mapperId, file)
                 mapper.start()
-                mapper.join()
+                # mapper.join()
                 self.mapperJobs[mapperId] = file
                 i = i+1
             else:
@@ -126,7 +124,6 @@ class Master(Process):
     def checkForMappersStatus(self):
         for i in range(self.nMappers):
             kv = self.keyValueClient.getKey(getMapperStatusKey(i))
-
             if kv and kv.decode() == WorkerStatus.IDLE.value :
                 self.availableMapperQueue.put(i)
                 self.idleMappers = self.idleMappers + 1
@@ -142,7 +139,6 @@ class Master(Process):
         pass
 
     def run(self):
-        print('hererrere')
         self.preprocessing()
 
 
