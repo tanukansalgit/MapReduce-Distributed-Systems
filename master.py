@@ -1,25 +1,41 @@
 from multiprocessing import Process
 import os
+from multiprocessing import Queue
 
 from mapper import Mapper
-
+from keyValueClient import KeyValueClient
+from utility import WorkerStatus, getMapperStatusKey
 
 class Master(Process):
     def __init__(self, nMappers, nReducers, filePaths, fileMaxSize):
+        super(Master, self).__init__()
         self.nMappers = nMappers
         self.nReducers = nReducers
         self.filePaths = filePaths
         self.fileMaxSize = fileMaxSize
+        self.kvData = {}
+
+        self.reducers = []
+        self.idleReducers = 0
+        self.availableReducerQueue = Queue()
+        self.reducerJobs = {}
+
+        self.mappers = []
+        self.idleMappers = 0
+        self.availableMapperQueue = Queue()
+        self.mapperJobs = {}
+
+        self.keyValueClient = KeyValueClient()
 
         self.fileDirectory = "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/assets"
-
-        self.preprocessing()
         pass
 
     #preprocessing
     def preprocessing(self):
         self.splitFiles()
-        self.initializeMasters()
+        self.initializeMappers()
+        self.assignFilePartitionsToMapper()
+        print('mapperjobs==', self.mapperJobs)
         pass
 
     '''
@@ -76,20 +92,59 @@ class Master(Process):
 
             self.filePaths = filePaths
 
-    def initializeMasters(self):
-        mappers = []
+    def initializeMappers(self):
+        print('initialise calling')
         for i in range(self.nMappers):
-            mappers.append(Mapper(i))
+            self.availableMapperQueue.put(i)
+            key = getMapperStatusKey(i)
+            value = WorkerStatus.IDLE.value
+            self.keyValueClient.setKey(key, value)
+
+        self.idleMappers = self.nMappers
+
+    def createMapper(self, id, file):
+        return Mapper(id, file)
+
+    def assignFilePartitionsToMapper(self):
+        totalFiles = len(self.filePaths)
+
+        i = 0
+        while(i<totalFiles):
+            file = self.filePaths[i]
+            if self.idleMappers:
+                self.idleMappers = self.idleMappers - 1
+                mapperId = self.availableMapperQueue.get()
+                mapper = self.createMapper(mapperId, file)
+                mapper.start()
+                mapper.join()
+                self.mapperJobs[mapperId] = file
+                i = i+1
+            else:
+                while(not self.idleMappers):
+                    self.checkForMappersStatus()
+
+    def checkForMappersStatus(self):
+        for i in range(self.nMappers):
+            kv = self.keyValueClient.getKey(getMapperStatusKey(i))
+
+            if kv and kv.decode() == WorkerStatus.IDLE.value :
+                self.availableMapperQueue.put(i)
+                self.idleMappers = self.idleMappers + 1
+
+
+    def initializeReducers(self):
         pass
 
-    def initializeReducers():
+    def checkFailedMappers(self):
         pass
 
-    def checkFailedMasters():
+    def checkFailedReducers(self):
         pass
 
-    def checkFailedReducers():
-        pass
+    def run(self):
+        print('hererrere')
+        self.preprocessing()
 
-    def assignFilePartitionsToMapper():
-        pass
+
+
+
