@@ -1,27 +1,27 @@
 from multiprocessing import Process
-from utility import WorkerStatus, getMapperCountOutputKey, getMapperFileOutputKey, getMapperStatusKey
+from utility import WorkerStatus
 from keyValueClient import KeyValueClient
 
 class Mapper(Process):
 
-    def __init__(self, id, file):
+    def __init__(self, id, file, statusKey, countOutputKey, fileOutputKey):
         super(Mapper, self).__init__()
         self.id = id
         self.state = WorkerStatus.IDLE.value
         self.keyValueClient = KeyValueClient()
         self.file = file
-        self.mapperKey = getMapperStatusKey(id)
+        self.mapperKey = statusKey
+        self.countKey = countOutputKey
+        self.fileKey = fileOutputKey
 
     def processFile(self):
         try:
             fileName = self.file.split("/")[-1]
             content = ""
 
-            countKey = getMapperCountOutputKey(self.id)
-            countContent = self.keyValueClient.getKey(countKey)
-            
-            fileKey = getMapperFileOutputKey(self.id)
-            fileContent = self.keyValueClient.getKey(fileKey)
+            countContent = self.keyValueClient.getKey(self.countKey)
+
+            fileContent = self.keyValueClient.getKey(self.fileKey)
 
             countContent = countContent.decode() if countContent else ""
             fileContent = fileContent.decode() if fileContent else ""
@@ -34,8 +34,8 @@ class Mapper(Process):
                 countContent = countContent + f" {word} 1"
                 fileContent = fileContent + f" {word} {fileName}"
 
-            self.keyValueClient.setKey(countKey, countContent)
-            self.keyValueClient.setKey(fileKey, fileContent)
+            self.keyValueClient.setKey(self.countKey, countContent)
+            self.keyValueClient.setKey(self.fileKey, fileContent)
         except Exception as e:
             print(f"Exception in {self.id} mapper: {e}")
             self.keyValueClient.setKey(self.mapperKey, WorkerStatus.FAILED.value)

@@ -4,7 +4,8 @@ from multiprocessing import Queue
 
 from mapper import Mapper
 from keyValueClient import KeyValueClient
-from utility import WorkerStatus, getMapperStatusKey
+from utility import WorkerStatus, getMapperStatusKey, getMapperFileOutputKey, getMapperCountOutputKey
+from keyValueClient import KeyValueClient
 
 class Master(Process):
     def __init__(self, nMappers, nReducers, filePaths, fileMaxSize):
@@ -24,6 +25,8 @@ class Master(Process):
         self.idleMappers = 0
         self.availableMapperQueue = Queue()
         self.mapperJobs = {}
+        self.mapperCountOutputKeys = set()
+        self.mapperFileOutputKeys = set()
 
         self.keyValueClient = KeyValueClient()
 
@@ -35,6 +38,12 @@ class Master(Process):
         self.splitFiles()
         self.initializeMappers()
         self.assignFilePartitionsToMapper()
+
+        while(self.idleMappers != self.nMappers):
+            self.checkForMappersStatus()
+
+        self.initializeReducers()
+
         pass
 
     '''
@@ -101,7 +110,17 @@ class Master(Process):
         self.idleMappers = self.nMappers
 
     def createMapper(self, id, file):
-        return Mapper(id, file)
+        countOutputKey = getMapperCountOutputKey(id)
+        fileOutputKey = getMapperFileOutputKey(id)
+
+        self.mapperCountOutputKeys.add(countOutputKey)
+        self.mapperFileOutputKeys.add(fileOutputKey)
+
+        return Mapper(id,
+        file,
+        getMapperStatusKey(id),
+        countOutputKey,
+        fileOutputKey)
 
     def assignFilePartitionsToMapper(self):
         totalFiles = len(self.filePaths)
@@ -112,9 +131,9 @@ class Master(Process):
             if self.idleMappers:
                 self.idleMappers = self.idleMappers - 1
                 mapperId = self.availableMapperQueue.get()
-                mapper = self.createMapper(mapperId, file)
+
+                mapper = self.createMapper(mapperId,file)
                 mapper.start()
-                # mapper.join()
                 self.mapperJobs[mapperId] = file
                 i = i+1
             else:
