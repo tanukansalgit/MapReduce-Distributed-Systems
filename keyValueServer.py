@@ -38,7 +38,7 @@ def recieveData(sock):
     if len(chunk) < INITIAL_BUFFER_SIZE:
         break
 
-  return data.decode()
+  return data.decode('utf-8')
 
 def getValue(key):
   result = []
@@ -51,7 +51,8 @@ def getValue(key):
 def setValue(key, value, flag, length):
   threadLockHandle.acquire()
   try:
-    with open(DATA_FILE, 'w') as filename:
+    value = value
+    with open(DATA_FILE, 'w', encoding='utf-8') as filename:
       kvData[key] = [value, flag, length]
       json.dump(kvData, filename)
       filename.close()
@@ -90,8 +91,9 @@ def handleClient(connection, isSleep):
     elif action == commands['GET']:
       val = getValue(key)
       if val and val[0]:
+        res = val[0]
         firstMessage = f"VALUE {key} {val[1]} {val[2]}{END_STRING}"
-        secondMessage = f"{val[0]}{END_STRING}"
+        secondMessage = f"{res}{END_STRING}"
         sendResponse(firstMessage, connection)
         sendResponse(secondMessage, connection)
       responseMessage = response["end"] + END_STRING

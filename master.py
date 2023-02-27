@@ -16,8 +16,8 @@ class Master(Process):
         self.filePaths = filePaths
         self.fileMaxSize = fileMaxSize
 
-        self.kvCountData = {}
-        self.kvFileData = {}
+        self.kvCountData = ""
+        self.kvFileData = ""
 
         self.reducers = []
         self.idleReducers = 0
@@ -37,7 +37,8 @@ class Master(Process):
         self.keyValueClient = KeyValueClient()
 
         self.fileDirectory = "assets"
-        self.resultFile = 'output.json'
+        self.outputCountFile = 'count-output.txt'
+        self.outputInvertedIndexFile = 'inverted-index-output.txt'
         pass
 
     #preprocessing
@@ -208,22 +209,26 @@ class Master(Process):
         for key in self.reducerCountOutputKeys:
             value = self.keyValueClient.getKey(key)
             value = json.loads(value)
+
             for k in value:
-                self.kvCountData[k] = value[k]
+                self.kvCountData = f"{self.kvCountData} {k} {value[k]}\n"
 
         for key in self.reducerFileOutputKeys:
             value = self.keyValueClient.getKey(key)
             value = json.loads(value)
 
             for k in value:
-                self.kvFileData[k] = value[k]
+                self.kvFileData = f"{self.kvFileData} {k} {value[k]}\n"
 
-        result['counter'] = self.kvCountData
-        result['invertedIndex'] = self.kvFileData
 
-        with open(self.resultFile, 'w') as filename:
-            json.dump(result, filename)
+        with open(self.outputCountFile, 'w', encoding='utf-8') as filename:
+            filename.write(self.kvCountData)
             filename.close()
+
+        with open(self.outputInvertedIndexFile, 'w', encoding='utf-8') as filename:
+            filename.write(self.kvFileData)
+            filename.close()
+
         pass
 
     def run(self):

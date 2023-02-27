@@ -8,7 +8,7 @@ class KeyValueClient:
 
     def setKey(self, key, value):
         try:
-            client = Client(self.host + ":" + str(self.port), default_noreply=False)
+            client = Client(self.host + ":" + str(self.port), default_noreply=False, encoding='utf-8')
             result = client.set(key, value)
             client.close()
             return result
