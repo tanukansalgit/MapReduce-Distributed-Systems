@@ -19,7 +19,8 @@ kvData = {}
 
 commands = {
   'SET' : "set",
-  'GET' : "get"
+  'GET' : "get",
+  'DELETE' : "delete"
 }
 
 response = {
@@ -58,6 +59,18 @@ def setValue(key, value, flag, length):
   finally:
     threadLockHandle.release()
 
+def deleteFile():
+  threadLockHandle.acquire()
+  try:
+    with open(DATA_FILE, 'w') as filename:
+      kvData = {}
+      json.dump(kvData, filename)
+      filename.close()
+  except error:
+    print('Exception: ', error)
+  finally:
+    threadLockHandle.release()
+
 
 def handleClient(connection, isSleep):
   try:
@@ -84,6 +97,10 @@ def handleClient(connection, isSleep):
         sendResponse(firstMessage, connection)
         sendResponse(secondMessage, connection)
       responseMessage = response["end"] + END_STRING
+    elif action == commands['DELETE']:
+      deleteFile()
+      responseMessage = response["stored"] + END_STRING
+      pass
     else:
       raise Exception('Invalid command')
 

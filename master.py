@@ -36,11 +36,12 @@ class Master(Process):
 
         self.keyValueClient = KeyValueClient()
 
-        self.fileDirectory = "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/assets"
+        self.fileDirectory = "assets"
         pass
 
     #preprocessing
     def preprocessing(self):
+        self.cleanKeyValue()
         self.splitFiles()
         self.initializeMappers()
         self.assignFilePartitionsToMapper()
@@ -109,6 +110,10 @@ class Master(Process):
                     chunkNumber = chunkNumber + 1
 
             self.filePaths = filePaths
+
+    def cleanKeyValue(self):
+        self.keyValueClient.delete()
+        pass
 
     def initializeMappers(self):
         for i in range(self.nMappers):

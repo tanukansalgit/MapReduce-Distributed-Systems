@@ -5,7 +5,7 @@ class MapReduce:
         self.nMappers = mappers
         self.nReducers = reducers
         self.filePaths = filePaths
-        self.fileMaxSize = 100
+        self.fileMaxSize = 1000
         pass
 
     def initialiseMaster(self):
@@ -18,7 +18,7 @@ class MapReduce:
 if __name__ == "__main__":
     mappers = 10
     reducers = 10
-    filePaths = ["/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file1.txt"
+    filePaths = ["/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file1.txt",
     # "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file2.txt",
     # "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file3.txt",
     # "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file4.txt",

@@ -28,6 +28,11 @@ class Mapper(Process):
 
             with open(self.file, 'r') as f:
                 content = f.read()
+
+            content = content.replace("\t", " ")
+            content = content.replace("\r\n", " ")
+            content = content.replace("\n", " ")
+
             content = content.split(" ")
 
             for word in content:

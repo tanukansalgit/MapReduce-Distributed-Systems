@@ -23,3 +23,8 @@ class KeyValueClient:
             return result.decode()
         except Exception as e:
             print("exception in get key", e)
+
+    def delete(self):
+        client = Client(self.host + ":" + str(self.port))
+        result = client.delete("all")
+        return True
