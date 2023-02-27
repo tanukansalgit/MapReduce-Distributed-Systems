@@ -68,6 +68,7 @@ class Reducer(Process):
 
 
     def run(self):
+        print(f"Running Reducer {self.id}")
         self.keyValueClient.setKey(self.reducerKey, WorkerStatus.IN_PROGRESS.value)
         self.processFiles()
         self.keyValueClient.setKey(self.reducerKey, WorkerStatus.IDLE.value)

@@ -174,6 +174,7 @@ class Master(Process):
                 self.idleMappers = self.idleMappers + 1
             #if mapper is failed, put it idle and puts its request to re-processing. Also sets its status to idle in key-value
             elif kv and kv == WorkerStatus.FAILED.value:
+                print(f"Mapper {i} is faulty")
                 self.availableMapperQueue.put(i)
                 self.availableMappers.add(i)
                 self.idleMappers = self.idleMappers + 1
@@ -233,6 +234,7 @@ class Master(Process):
                 self.idleReducers = self.idleReducers + 1
             #if reducer is failed, process it again
             elif kv and kv == WorkerStatus.FAILED.value:
+                print(f"Reducer {i} is faulty")
                 self.availableReducers.add(i)
                 self.idleReducers = self.idleReducers + 1
                 self.reProcessReducers.append(i)

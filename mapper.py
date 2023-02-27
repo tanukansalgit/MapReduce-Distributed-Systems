@@ -47,6 +47,7 @@ class Mapper(Process):
             self.keyValueClient.setKey(self.mapperKey, WorkerStatus.FAILED.value)
 
     def run(self):
+        print(f"Running Mapper {self.id}")
         self.keyValueClient.setKey(self.mapperKey, WorkerStatus.IN_PROGRESS.value)
         self.processFile()
         self.keyValueClient.setKey(self.mapperKey, WorkerStatus.IDLE.value)
