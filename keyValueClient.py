@@ -1,4 +1,6 @@
 from pymemcache.client.base import Client
+import time
+
 class KeyValueClient:
     def __init__(self):
         self.host = "0.0.0.0"
@@ -25,6 +27,10 @@ class KeyValueClient:
             print("exception in get key", e)
 
     def delete(self):
-        client = Client(self.host + ":" + str(self.port))
-        result = client.delete("all")
+        try:
+            client = Client(self.host + ":" + str(self.port))
+            result = client.delete("all")
+            time.sleep(0.1)
+        except:
+            print('error in client delete function')
         return True

@@ -6,7 +6,7 @@ import json
 from mapper import Mapper
 from reducer import Reducer
 from keyValueClient import KeyValueClient
-from utility import WorkerStatus, getMapperStatusKey, getMapperFileOutputKey, getMapperCountOutputKey, getReducerStatusKey, getReducerFileOutputKey, getReducerCountOutputKey
+from utility import WorkerStatus, getMapperStatusKey, getMapperFileOutputKey, getMapperCountOutputKey, getReducerStatusKey, getReducerFileOutputKey, getReducerCountOutputKey, getFileName
 
 class Master(Process):
     def __init__(self, nMappers, nReducers, filePaths, fileMaxSize):
@@ -54,7 +54,7 @@ class Master(Process):
         while(self.idleReducers != self.nReducers):
             self.checkForReducerStatus()
         self.processOutput()
-        
+
     '''
     split files into equal size chunks, and output to a local folder
     Alternative, TODO:: to store start and end pointer for each chunk,
@@ -69,7 +69,7 @@ class Master(Process):
             os.makedirs(target)
 
         for inputFile in self.filePaths:
-            fileName = inputFile.split("/")[-1]
+            fileName = getFileName(inputFile)
 
             with open(inputFile, 'rb') as file:
                 startPointer = 0
@@ -200,8 +200,6 @@ class Master(Process):
             if kv and kv == WorkerStatus.IDLE.value and i not in self.availableMappers:
                 self.availableMappers.add(i)
                 self.idleReducers = self.idleReducers + 1
-
-        pass
 
     def processOutput(self):
 

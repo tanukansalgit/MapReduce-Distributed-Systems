@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 
 class WorkerStatus(Enum):
     IDLE = '0'
@@ -23,3 +24,7 @@ def getReducerCountOutputKey(id):
 
 def getReducerFileOutputKey(id):
     return f"reducer-{id}-file-output"
+
+def getFileName(filePath):
+    return os.path.basename(filePath)
+    pass

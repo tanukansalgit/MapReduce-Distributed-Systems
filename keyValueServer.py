@@ -14,6 +14,7 @@ DATA_FILE = "keyValue.json"
 
 END_STRING = "\r\n"
 
+global kvData
 
 kvData = {}
 
@@ -60,16 +61,13 @@ def setValue(key, value, flag, length):
     threadLockHandle.release()
 
 def deleteFile():
-  threadLockHandle.acquire()
+  global kvData
   try:
     with open(DATA_FILE, 'w') as filename:
       kvData = {}
-      json.dump(kvData, filename)
       filename.close()
   except error:
     print('Exception: ', error)
-  finally:
-    threadLockHandle.release()
 
 
 def handleClient(connection, isSleep):

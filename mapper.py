@@ -1,5 +1,5 @@
 from multiprocessing import Process
-from utility import WorkerStatus
+from utility import WorkerStatus, getFileName
 from keyValueClient import KeyValueClient
 
 class Mapper(Process):
@@ -16,7 +16,7 @@ class Mapper(Process):
 
     def processFile(self):
         try:
-            fileName = self.file.split("/")[-1]
+            fileName = getFileName(self.file)
             content = ""
 
             countContent = self.keyValueClient.getKey(self.countKey)
