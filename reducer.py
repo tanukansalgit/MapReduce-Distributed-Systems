@@ -33,7 +33,11 @@ class Reducer(Process):
         for key in self.countOutputKeys:
             valueString = self.keyValueClient.getKey(key)
             values = valueString.split(" ")
-            for val in values:
+
+            length = len(values)
+
+            for i in range(0,length,2):
+                val = values[i]
                 if val and self.assignedKey(val):
                     if val not in self.resultCountKeys:
                         self.resultCountKeys[val] = 0

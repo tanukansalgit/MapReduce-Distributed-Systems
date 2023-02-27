@@ -9,7 +9,7 @@ from keyValueClient import KeyValueClient
 from utility import WorkerStatus, getMapperStatusKey, getMapperFileOutputKey, getMapperCountOutputKey, getReducerStatusKey, getReducerFileOutputKey, getReducerCountOutputKey, getFileName
 
 class Master(Process):
-    def __init__(self, nMappers, nReducers, filePaths, fileMaxSize):
+    def __init__(self, nMappers, nReducers, filePaths, fileMaxSize, outputCountFile, outputInvertedIndexFile):
         super(Master, self).__init__()
         self.nMappers = nMappers
         self.nReducers = nReducers
@@ -37,8 +37,8 @@ class Master(Process):
         self.keyValueClient = KeyValueClient()
 
         self.fileDirectory = "assets"
-        self.outputCountFile = 'count-output.txt'
-        self.outputInvertedIndexFile = 'inverted-index-output.txt'
+        self.outputCountFile = outputCountFile
+        self.outputInvertedIndexFile = outputInvertedIndexFile
         pass
 
     #preprocessing

@@ -37,7 +37,7 @@ class Mapper(Process):
 
             for word in content:
                 if word:
-                    countContent = countContent + f" {word}"
+                    countContent = countContent + f" {word} 1"
                     fileContent = fileContent + f" {word} {fileName}"
 
             self.keyValueClient.setKey(self.countKey, countContent[1:])
