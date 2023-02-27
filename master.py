@@ -37,6 +37,7 @@ class Master(Process):
         self.keyValueClient = KeyValueClient()
 
         self.fileDirectory = "assets"
+        self.resultFile = 'output.json'
         pass
 
     #preprocessing
@@ -52,11 +53,8 @@ class Master(Process):
         self.initializeReducers()
         while(self.idleReducers != self.nReducers):
             self.checkForReducerStatus()
-
-        self.processData()
-        print("final count result==", self.kvCountData)
-        print("final file output==", self.kvFileData)
-
+        self.processOutput()
+        
     '''
     split files into equal size chunks, and output to a local folder
     Alternative, TODO:: to store start and end pointer for each chunk,
@@ -205,11 +203,13 @@ class Master(Process):
 
         pass
 
-    def processData(self):
+    def processOutput(self):
+
+        result = {}
+
         for key in self.reducerCountOutputKeys:
             value = self.keyValueClient.getKey(key)
             value = json.loads(value)
-
             for k in value:
                 self.kvCountData[k] = value[k]
 
@@ -219,7 +219,15 @@ class Master(Process):
 
             for k in value:
                 self.kvFileData[k] = value[k]
+
+        result['counter'] = self.kvCountData
+        result['invertedIndex'] = self.kvFileData
+
+        with open(self.resultFile, 'w') as filename:
+            json.dump(result, filename)
+            filename.close()
         pass
+
     def run(self):
         self.preprocessing()
 
