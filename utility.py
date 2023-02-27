@@ -18,5 +18,8 @@ def getMapperFileOutputKey(id):
 def getReducerStatusKey(id):
     return f"{id}-reducer-status"
 
-def getReducerOutputKey(id):
-    return f"reducer-{id}-output"
+def getReducerCountOutputKey(id):
+    return f"reducer-{id}-count-output"
+
+def getReducerFileOutputKey(id):
+    return f"reducer-{id}-file-output"

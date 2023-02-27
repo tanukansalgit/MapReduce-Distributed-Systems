@@ -64,8 +64,6 @@ def handleClient(connection, isSleep):
     responseMessage = ""
     dataBytes = recieveData(connection).split("\r\n")
 
-    print('dataBytes===', dataBytes)
-
     keyString = dataBytes[0].split(" ")
     valueString = "".join(dataBytes[1:])
 

@@ -23,19 +23,20 @@ class Mapper(Process):
 
             fileContent = self.keyValueClient.getKey(self.fileKey)
 
-            countContent = countContent.decode() if countContent else ""
-            fileContent = fileContent.decode() if fileContent else ""
+            countContent = (" "+ countContent) if countContent else ""
+            fileContent = (" "+ fileContent) if fileContent else ""
 
             with open(self.file, 'r') as f:
                 content = f.read()
             content = content.split(" ")
 
             for word in content:
-                countContent = countContent + f" {word} 1"
-                fileContent = fileContent + f" {word} {fileName}"
+                if word:
+                    countContent = countContent + f" {word}"
+                    fileContent = fileContent + f" {word} {fileName}"
 
-            self.keyValueClient.setKey(self.countKey, countContent)
-            self.keyValueClient.setKey(self.fileKey, fileContent)
+            self.keyValueClient.setKey(self.countKey, countContent[1:])
+            self.keyValueClient.setKey(self.fileKey, fileContent[1:])
         except Exception as e:
             print(f"Exception in {self.id} mapper: {e}")
             self.keyValueClient.setKey(self.mapperKey, WorkerStatus.FAILED.value)

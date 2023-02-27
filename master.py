@@ -1,11 +1,12 @@
 from multiprocessing import Process
 import os
 from multiprocessing import Queue
+import json
 
 from mapper import Mapper
+from reducer import Reducer
 from keyValueClient import KeyValueClient
-from utility import WorkerStatus, getMapperStatusKey, getMapperFileOutputKey, getMapperCountOutputKey
-from keyValueClient import KeyValueClient
+from utility import WorkerStatus, getMapperStatusKey, getMapperFileOutputKey, getMapperCountOutputKey, getReducerStatusKey, getReducerFileOutputKey, getReducerCountOutputKey
 
 class Master(Process):
     def __init__(self, nMappers, nReducers, filePaths, fileMaxSize):
@@ -14,16 +15,21 @@ class Master(Process):
         self.nReducers = nReducers
         self.filePaths = filePaths
         self.fileMaxSize = fileMaxSize
-        self.kvData = {}
+
+        self.kvCountData = {}
+        self.kvFileData = {}
 
         self.reducers = []
         self.idleReducers = 0
-        self.availableReducerQueue = Queue()
+        self.availableReducers = set()
         self.reducerJobs = {}
+        self.reducerCountOutputKeys = set()
+        self.reducerFileOutputKeys = set()
 
         self.mappers = []
         self.idleMappers = 0
         self.availableMapperQueue = Queue()
+        self.availableMappers = set()
         self.mapperJobs = {}
         self.mapperCountOutputKeys = set()
         self.mapperFileOutputKeys = set()
@@ -43,8 +49,12 @@ class Master(Process):
             self.checkForMappersStatus()
 
         self.initializeReducers()
+        while(self.idleReducers != self.nReducers):
+            self.checkForReducerStatus()
 
-        pass
+        self.processData()
+        print("final count result==", self.kvCountData)
+        print("final file output==", self.kvFileData)
 
     '''
     split files into equal size chunks, and output to a local folder
@@ -103,6 +113,7 @@ class Master(Process):
     def initializeMappers(self):
         for i in range(self.nMappers):
             self.availableMapperQueue.put(i)
+            self.availableMappers.add(i)
             key = getMapperStatusKey(i)
             value = WorkerStatus.IDLE.value
             self.keyValueClient.setKey(key, value)
@@ -131,8 +142,8 @@ class Master(Process):
             if self.idleMappers:
                 self.idleMappers = self.idleMappers - 1
                 mapperId = self.availableMapperQueue.get()
-
                 mapper = self.createMapper(mapperId,file)
+                self.availableMappers.remove(mapperId)
                 mapper.start()
                 self.mapperJobs[mapperId] = file
                 i = i+1
@@ -143,13 +154,36 @@ class Master(Process):
     def checkForMappersStatus(self):
         for i in range(self.nMappers):
             kv = self.keyValueClient.getKey(getMapperStatusKey(i))
-            if kv and kv.decode() == WorkerStatus.IDLE.value :
+            if kv and kv == WorkerStatus.IDLE.value and i not in self.availableMappers:
                 self.availableMapperQueue.put(i)
+                self.availableMappers.add(i)
                 self.idleMappers = self.idleMappers + 1
 
-
     def initializeReducers(self):
+        for i in range(self.nReducers):
+            reducer = self.createReducer(i)
+            reducer.start()
+            reducer.join()
+        self.idleReducers = self.nReducers
         pass
+
+    def createReducer(self, id):
+        countOutputKey = getReducerCountOutputKey(id)
+        fileOutputKey = getReducerFileOutputKey(id)
+        reducerStatusKey = getReducerStatusKey(id)
+
+        self.reducerCountOutputKeys.add(countOutputKey)
+        self.reducerFileOutputKeys.add(fileOutputKey)
+
+        self.keyValueClient.setKey(reducerStatusKey, WorkerStatus.IDLE.value)
+
+        return Reducer(id,
+        self.nReducers,
+        reducerStatusKey,
+        countOutputKey,
+        fileOutputKey,
+        self.mapperFileOutputKeys,
+        self.mapperCountOutputKeys)
 
     def checkFailedMappers(self):
         pass
@@ -157,6 +191,30 @@ class Master(Process):
     def checkFailedReducers(self):
         pass
 
+    def checkForReducerStatus(self):
+        for i in range(self.nReducers):
+            kv = self.keyValueClient.getKey(getReducerStatusKey(i))
+            if kv and kv == WorkerStatus.IDLE.value and i not in self.availableMappers:
+                self.availableMappers.add(i)
+                self.idleReducers = self.idleReducers + 1
+
+        pass
+
+    def processData(self):
+        for key in self.reducerCountOutputKeys:
+            value = self.keyValueClient.getKey(key)
+            value = json.loads(value)
+
+            for k in value:
+                self.kvCountData[k] = value[k]
+
+        for key in self.reducerFileOutputKeys:
+            value = self.keyValueClient.getKey(key)
+            value = json.loads(value)
+
+            for k in value:
+                self.kvFileData[k] = value[k]
+        pass
     def run(self):
         self.preprocessing()
 

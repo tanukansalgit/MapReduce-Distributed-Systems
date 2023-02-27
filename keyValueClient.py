@@ -1,5 +1,4 @@
 from pymemcache.client.base import Client
-
 class KeyValueClient:
     def __init__(self):
         self.host = "0.0.0.0"
@@ -12,13 +11,15 @@ class KeyValueClient:
             client.close()
             return result
         except:
-            print()
+            print('exception in set key')
 
     def getKey(self, key):
         try:
             client = Client(self.host + ":" + str(self.port))
             result = client.get(key)
             client.close()
-            return result
+            if result is None:
+                return result
+            return result.decode()
         except Exception as e:
             print("exception in get key", e)
