@@ -44,11 +44,11 @@ No direct communication between master and other entities.
 Key-Value is hosted in a different environment.
 
 ## API_EXPOSED
-mappers - number of mappers
-reducers - number of reducers
-filePaths - Array of all the filePaths for processing
-outputCountFilePath - File-Path for Word-Count
-outputInvertedIndexFilePath - File-Path for Inverted-Index
+- mappers - number of mappers
+- reducers - number of reducers
+- filePaths - Array of all the filePaths for processing
+- outputCountFilePath - File-Path for Word-Count
+- outputInvertedIndexFilePath - File-Path for Inverted-Index
 
 ## ASSUMPTION
 1. MapReduce assumes that the key-value store is a reliable shared resource that can be accessed by both mappers and reducers to communicate and exchange data.

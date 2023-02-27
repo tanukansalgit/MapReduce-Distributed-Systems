@@ -22,9 +22,6 @@ if __name__ == "__main__":
     reducers = 10
     filePaths = ["/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file1.txt",
     "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file2.txt",
-    # "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file3.txt",
-    # "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file4.txt",
-    # "/Users/tanukansal/Documents/distributedSystems/MapReduce-Distributed-Systems/input/file5.txt"
     ]
     outputCountFilePath = 'count-output.txt'
     outputInvertedIndexFilePath = 'inverted-index-output.txt'
