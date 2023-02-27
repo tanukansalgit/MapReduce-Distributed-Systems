@@ -1,6 +1,6 @@
 # MapReduce-Distributed-Systems
-## OVERVIEW
 
+## OVERVIEW
 It contains an implementation of the MapReduce model. It divides the task into two functions: Mapper and Reducer, and uses a key-value store for efficient communication between the master and Mapper/Reducer functions. The end-user provides input/output locations, as well as the number of mappers and reducers to distribute the processing load.
  Here, the end user is obliged to provide the input location, number of mappers, number of reducers  and output location.
 
@@ -63,6 +63,10 @@ Key-Value is hosted in a different environment.
 3. Data Skew: The hash function used to divide the data between different reducers may not always result in an even distribution of data, which can lead to data skew. This can result in some reducers processing more data than others, leading to performance issues.
 4.Single Point of Failure: The Master node acts as the central coordinator for the entire MapReduce process, which means that if the Master fails, the entire process comes to a halt. This can be a significant limitation for large-scale systems where high availability is critical.
 5. Lack of Flexibility: The MapReduce model is designed to work with specific types of data processing tasks, which means that it may not be suitable for all types of data processing needs. This lack of flexibility can be a limitation for some applications.
+
+## STEPS TO RUN
+1. python keyValueServer.py - To start keyValue server.
+2. python mapReduce.py - To start MapReduce model.
 
 
 
